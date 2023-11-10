@@ -8,6 +8,7 @@ import random
 import os
 import re
 import zipfile
+
 try:
     import dns.resolver
     import requests
@@ -35,7 +36,7 @@ except ImportError:
         sys.exit(1)
 
 
-def get_info(web_addrs: list) -> dict:
+def get_info(server_ip: str, web_addrs: list) -> dict:
     api_token = '3bd22fe89c5c42d386d84297d53389d3'
     port = 443
     context = ssl.create_default_context()
@@ -93,9 +94,10 @@ def get_info(web_addrs: list) -> dict:
 
 
 def main() -> None:
+    server_ip = input('- Enter your Ubuntu server IP: ').strip()
     outlist = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=30) as executer:
-        tasks = [executer.submit(get_info, url_group) for url_group in input_urls]
+        tasks = [executer.submit(get_info, server_ip, url_group) for url_group in input_urls]
         for task in concurrent.futures.as_completed(tasks):
             result = task.result()
             if result:
@@ -110,7 +112,6 @@ def main() -> None:
         sys.exit(0)
     else:
         sys.exit(1)
-
 def sort_output(lst: list) -> None:
     output_urls = [item for sublst in lst for item in sublst]
     not_sorted_dict = {}
